@@ -100,9 +100,30 @@ CURRENCIES: dict[str, str] = {
 }
 ```
 
-## Automating with cron
+## Deploying to Railway (recommended)
 
-To run the check once a day at 9 AM:
+[Railway](https://railway.com) runs the script on a schedule with no server to manage. The repo already includes a `railway.toml` that runs the check at 09:00 UTC, Monday through Thursday.
+
+### Steps
+
+1. Push this repo to GitHub.
+2. Go to [railway.com](https://railway.com) → **New Project** → **Deploy from GitHub repo** → select this repo.
+3. Once the service is created, open its **Variables** tab and add:
+
+   | Key | Value |
+   |---|---|
+   | `TELEGRAM_TOKEN` | your bot token |
+   | `TELEGRAM_CHAT_ID` | your chat ID |
+
+4. Railway will detect `railway.toml` automatically. The service type will be **Cron** and it will run `python main.py` every day at 09:00 UTC.
+
+To change the schedule, edit `cronSchedule` in `railway.toml` using standard cron syntax — for example `"0 1 * * 1-4"` for 01:00 UTC Monday–Thursday.
+
+> The script calls `sys.exit(0)` when finished, which is required for Railway cron jobs to register a successful run.
+
+## Automating locally with cron
+
+If you prefer to run it on your own machine instead:
 
 ```bash
 crontab -e
