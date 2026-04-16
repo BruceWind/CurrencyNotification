@@ -81,26 +81,26 @@ def check_and_notify(name: str, ticker_symbol: str) -> None:
 
     if current >= max_val:
         send_telegram(
-            f"[{name}] ALERT: price {current:.4f} >= historical MAX monthly avg "
+            f"[{name}] 🔴ALERT: price {current:.4f} >= historical MAX monthly avg "
             f"{max_val:.4f}. Consider selling."
         )
         alerted = True
     elif current >= third_max_val:
         send_telegram(
-            f"[{name}] NOTICE: price {current:.4f} >= 3rd-highest monthly avg "
+            f"[{name}]  🟡NOTICE: price {current:.4f} >= 3rd-highest monthly avg "
             f"{third_max_val:.4f}. Price is in upper range."
         )
         alerted = True
 
     if current <= min_val:
         send_telegram(
-            f"[{name}] ALERT: price {current:.4f} <= historical MIN monthly avg "
+            f"[{name}] 🟢ALERT: price {current:.4f} <= historical MIN monthly avg "
             f"{min_val:.4f}. Consider buying."
         )
         alerted = True
     elif current <= third_min_val:
         send_telegram(
-            f"[{name}] NOTICE: price {current:.4f} <= 3rd-lowest monthly avg "
+            f"[{name}]  🔵NOTICE: price {current:.4f} <= 3rd-lowest monthly avg "
             f"{third_min_val:.4f}. Price is in lower range."
         )
         alerted = True
@@ -111,6 +111,11 @@ def check_and_notify(name: str, ticker_symbol: str) -> None:
 
 def main() -> None:
     print("CurrencyNotification starting ...")
+
+    missing = [name for name, val in [("TELEGRAM_TOKEN", TELEGRAM_TOKEN), ("TELEGRAM_CHAT_ID", TELEGRAM_CHAT_ID)] if not val]
+    if missing:
+        raise EnvironmentError(f"Required environment variable(s) are not set or empty: {', '.join(missing)}")
+
     for name, symbol in CURRENCIES.items():
         try:
             check_and_notify(name, symbol)
