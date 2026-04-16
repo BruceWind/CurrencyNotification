@@ -62,7 +62,8 @@ def get_current_price(ticker_symbol: str) -> float:
     return float(hist["Close"].iloc[-1])
 
 
-def check_and_notify(name: str, ticker_symbol: str) -> None:
+def check_currency(name: str, ticker_symbol: str) -> list[str]:
+    """Return alert lines for a currency pair without sending anything."""
     print(f"\nChecking {name} ({ticker_symbol}) ...")
 
     monthly_avg = fetch_monthly_averages(ticker_symbol)
@@ -80,36 +81,34 @@ def check_and_notify(name: str, ticker_symbol: str) -> None:
     print(f"  Historical min avg  : {min_val:.4f}")
     print(f"  3rd-lowest avg      : {third_min_val:.4f}")
 
-    alerted = False
+    lines: list[str] = []
 
     if current >= max_val:
-        send_telegram(
+        lines.append(
             f"[{name}] 🔴ALERT: price {current:.4f} >= historical MAX monthly avg "
             f"{max_val:.4f}. Consider selling."
         )
-        alerted = True
     elif current >= third_max_val:
-        send_telegram(
-            f"[{name}]  🟡NOTICE: price {current:.4f} >= 3rd-highest monthly avg "
+        lines.append(
+            f"[{name}] 🟡NOTICE: price {current:.4f} >= 3rd-highest monthly avg "
             f"{third_max_val:.4f}. Price is in upper range."
         )
-        alerted = True
 
     if current <= min_val:
-        send_telegram(
+        lines.append(
             f"[{name}] 🟢ALERT: price {current:.4f} <= historical MIN monthly avg "
             f"{min_val:.4f}. Consider buying."
         )
-        alerted = True
     elif current <= third_min_val:
-        send_telegram(
-            f"[{name}]  🔵NOTICE: price {current:.4f} <= 3rd-lowest monthly avg "
+        lines.append(
+            f"[{name}] 🔵NOTICE: price {current:.4f} <= 3rd-lowest monthly avg "
             f"{third_min_val:.4f}. Price is in lower range."
         )
-        alerted = True
 
-    if not alerted:
+    if not lines:
         print("  No alert: price is within the normal historical range.")
+
+    return lines
 
 
 def main() -> None:
@@ -119,11 +118,15 @@ def main() -> None:
     if missing:
         raise EnvironmentError(f"Required environment variable(s) are not set or empty: {', '.join(missing)}")
 
+    all_lines: list[str] = []
     for name, symbol in CURRENCIES.items():
         try:
-            check_and_notify(name, symbol)
+            all_lines.extend(check_currency(name, symbol))
         except Exception as exc:
             print(f"  Error processing {name}: {exc}")
+
+    if all_lines:
+        send_telegram("\n".join(all_lines))
 
     print("\nAll checks complete. Exiting.")
     sys.exit(0)
