@@ -32,7 +32,7 @@ def send_telegram(message: str) -> None:
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
     resp = requests.post(
         url,
-        json={"chat_id": TELEGRAM_CHAT_ID, "text": message},
+        json={"chat_id": TELEGRAM_CHAT_ID, "text": message, "disable_notification": True},
         timeout=10,
     )
     resp.raise_for_status()
