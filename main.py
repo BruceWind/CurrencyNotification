@@ -16,6 +16,9 @@ TELEGRAM_CHAT_ID: str = os.getenv("TELEGRAM_CHAT_ID", "")
 CURRENCIES: dict[str, str] = {
     "AUD2CNY": "AUDCNY=X",
     "GBP2CNY": "GBPCNY=X",
+    "CAD2CNY": "CADCNY=X",
+    "EUR2CNY": "EURCNY=X",
+    "USD2CNY": "USDCNY=X",
 }
 
 HISTORY_YEARS = 3
